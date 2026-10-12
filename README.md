@@ -18,6 +18,7 @@ pytest -q          # boots the app against a throwaway DB (att_pytest) on MONGO_
 ```
 
 ## Notes
+- `app/main.py` is one file by the assignment's rule, layered top to bottom: settings, domain rules, errors, serialisation, schemas, pipelines, persistence (`Database` + repositories), services, routers, app factory.
 - All seven missing endpoints, the explain endpoint and the Part A fixes are implemented; nothing is missing.
 - Reported numbers are rounded half-up with exact integer/`Decimal` arithmetic (MongoDB `$round` is banker's rounding).
 - `REVIEW.md`: defects found in the starter. `DECISIONS.md`: design answers.
