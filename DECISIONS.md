@@ -1,0 +1,7 @@
+# DECISIONS.md
+
+1. **Indexes.** `employees.emp_code` (unique: duplicate creates, joins) and `{department, joined_on}`/`{joined_on}` (headcount, R9). On `attendance_logs`: `{emp_code, date}` unique (one record per day, PATCH, employee monthly), `{date desc, emp_code}` (default list order, month scans), `{status, date desc, emp_code}` (status filter), `{emp_code, punch_in desc}` (find the record a punch-out closes). Rejected: indexing `history` or `late_minutes`; nothing queries them. Every query is hinted so plans are deterministic.
+2. **Punch-in race.** I never check first. Both requests `insert_one`; the unique `(emp_code, date)` index lets one succeed (201) and raises `DuplicateKeyError` for the other, which becomes 409. Punch-out is the same idea: `update_one` filtered on `punch_out: null`; a matched count of 0 is a 409.
+3. **Ties.** Ranking uses `$setWindowFields` with `$rank`, then `rank <= limit`. Everyone tied at the cutoff rank is returned, so the response can exceed `limit`; ranks go 1, 2, 2, 4.
+4. **Headcount.** The department summary starts from `employees` (joined on or before month end) and `$lookup`s each person's logs, so someone with zero logs still adds 1 to headcount; later joiners never enter.
+5. **100x data.** Pre-aggregate: a monthly rollup collection per employee and department, updated on punch/PATCH, so analytics stop scanning raw logs; shard `attendance_logs` on `emp_code`.
