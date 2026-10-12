@@ -960,10 +960,10 @@ def list_attendance(
     return service.list(AttendanceQuery.parse(emp_code, date_from, date_to, status), page, page_size)
 
 
-@attendance_router.patch("/{emp_code}/{day}")
-def regularize_attendance(emp_code: str, day: str, body: RegularizeIn, service: AttendanceDep):
-    parse_date(day, "date", "path")
-    return service.regularize(emp_code, day, body)
+@attendance_router.patch("/{emp_code}/{date}")
+def regularize_attendance(emp_code: str, date: str, body: RegularizeIn, service: AttendanceDep):
+    parse_date(date, "date", "path")
+    return service.regularize(emp_code, date, body)
 
 
 @analytics_router.get("/employees/{emp_code}/monthly")
